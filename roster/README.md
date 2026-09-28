@@ -93,6 +93,7 @@ Promotion into a fact or source-attributed characterization requires opening the
 - `examples/example-roster.json` — synthetic example; it makes no claims about real people.
 - `tests/test_roster.py` — contract and precedence tests.
 - `VERIFICATION.md` — focused evidence for subjective-lens separation and vector-lead quarantine.
+- `HANDOFF_DATA_LAYER_INTERPRETIVE_BRANCHES.md` — implementation handoff for the existing data layer.
 - `PLAN.md` — ordered implementation and acceptance checks.
 
 ## Commands
