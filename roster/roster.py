@@ -17,12 +17,33 @@ ID_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_.:-]*$")
 ROOT_LISTS = (
     "sources",
     "evidence",
+    "retrievalLeads",
     "entities",
     "relationships",
     "cohorts",
     "editorContext",
     "storyBindings",
 )
+
+INTERPRETIVE_FACT_TOKENS = {
+    "character",
+    "framing",
+    "motive",
+    "motivation",
+    "personality",
+    "temperament",
+    "trait",
+}
+FACT_CLAIM_TYPES = {
+    "identity",
+    "role",
+    "affiliation",
+    "biographical_event",
+    "work",
+    "metric",
+    "status",
+    "membership",
+}
 
 
 def _require(condition: bool, message: str) -> None:
@@ -68,6 +89,24 @@ def _active(record: dict[str, Any], as_of: date) -> bool:
     return (start is None or start <= as_of) and (end is None or as_of <= end)
 
 
+def _is_lead_only_evidence(item: dict[str, Any]) -> bool:
+    return item.get("supportLevel") == "lead_only" or item.get("discoveryMethod") in {
+        "vector_similarity",
+        "lexical_search",
+    }
+
+
+def _require_source_bound_support(
+    record_id: str,
+    evidence_ids: list[str],
+    evidence: dict[str, dict[str, Any]],
+) -> None:
+    _require(evidence_ids and all(ref in evidence for ref in evidence_ids),
+             f"{record_id} requires source-bound evidence; evidence is missing or unknown")
+    _require(any(not _is_lead_only_evidence(evidence[ref]) for ref in evidence_ids),
+             f"{record_id} cannot be supported only by retrieval-lead evidence")
+
+
 def validate_roster(roster: dict[str, Any]) -> dict[str, Any]:
     """Validate references and semantics that JSON Schema cannot enforce alone."""
 
@@ -81,6 +120,7 @@ def validate_roster(roster: dict[str, Any]) -> dict[str, Any]:
 
     sources = _id_map(roster["sources"], "source")
     evidence = _id_map(roster["evidence"], "evidence")
+    retrieval_leads = _id_map(roster["retrievalLeads"], "retrievalLead")
     entities = _id_map(roster["entities"], "entity")
     relationships = _id_map(roster["relationships"], "relationship")
     cohorts = _id_map(roster["cohorts"], "cohort")
@@ -88,7 +128,7 @@ def validate_roster(roster: dict[str, Any]) -> dict[str, Any]:
 
     all_ids: dict[str, str] = {}
     for kind, mapping in (
-        ("source", sources), ("evidence", evidence), ("entity", entities),
+        ("source", sources), ("evidence", evidence), ("retrievalLead", retrieval_leads), ("entity", entities),
         ("relationship", relationships), ("cohort", cohorts), ("editorContext", editor),
     ):
         for item_id in mapping:
@@ -101,6 +141,14 @@ def validate_roster(roster: dict[str, Any]) -> dict[str, Any]:
                  f"evidence {item['id']} references unknown source {item.get('sourceId')}")
         _require(bool(item.get("locator")) and bool(item.get("quote")),
                  f"evidence {item['id']} requires locator and quote")
+        _require(item.get("discoveryMethod") in {
+            "source_bound", "structured_lookup", "vector_similarity", "lexical_search"
+        }, f"evidence {item['id']} has invalid discoveryMethod")
+        _require(item.get("supportLevel") in {"direct", "contextual", "lead_only"},
+                 f"evidence {item['id']} has invalid supportLevel")
+        if item["discoveryMethod"] in {"vector_similarity", "lexical_search"}:
+            _require(item["supportLevel"] == "lead_only",
+                     f"retrieval evidence {item['id']} must remain lead_only")
 
     claim_map: dict[str, dict[str, Any]] = {}
     characterization_map: dict[str, dict[str, Any]] = {}
@@ -127,9 +175,14 @@ def validate_roster(roster: dict[str, Any]) -> dict[str, Any]:
                      f"duplicate claim id: {claim_id}")
             _require(claim.get("status") in {"reviewed", "machine_candidate", "contested"},
                      f"claim {claim_id} has invalid status")
+            _require(claim.get("claimType") in FACT_CLAIM_TYPES,
+                     f"claim {claim_id} has invalid factual claimType")
+            predicate_tokens = set(re.findall(r"[a-z]+", str(claim.get("predicate", "")).casefold()))
+            _require(not predicate_tokens.intersection(INTERPRETIVE_FACT_TOKENS),
+                     f"claim {claim_id} is interpretive and belongs in characterizations or editorContext")
             refs = claim.get("evidenceIds")
-            _require(isinstance(refs, list) and refs, f"claim {claim_id} requires evidence")
-            _require(all(ref in evidence for ref in refs), f"claim {claim_id} has unknown evidence")
+            _require(isinstance(refs, list), f"claim {claim_id} evidenceIds must be an array")
+            _require_source_bound_support(f"claim {claim_id}", refs, evidence)
             _active(claim, date.today())
             claim_map[claim_id] = {**claim, "entityId": entity["id"]}
 
@@ -141,11 +194,13 @@ def validate_roster(roster: dict[str, Any]) -> dict[str, Any]:
                      f"duplicate characterization id: {item_id}")
             _require(item.get("status") in {"reviewed", "machine_candidate", "contested"},
                      f"characterization {item_id} has invalid status")
+            _require(item.get("lensType") in {
+                "self_description", "source_characterization", "critical_interpretation", "audience_perception"
+            }, f"characterization {item_id} requires a valid lensType")
             refs = item.get("evidenceIds")
-            _require(isinstance(refs, list) and refs,
-                     f"characterization {item_id} requires evidence")
-            _require(all(ref in evidence for ref in refs),
-                     f"characterization {item_id} has unknown evidence")
+            _require(isinstance(refs, list),
+                     f"characterization {item_id} evidenceIds must be an array")
+            _require_source_bound_support(f"characterization {item_id}", refs, evidence)
             _require(bool(item.get("trait")) and bool(item.get("statement")) and bool(item.get("attributedTo")),
                      f"characterization {item_id} requires trait, statement and attribution")
             _active(item, date.today())
@@ -156,10 +211,9 @@ def validate_roster(roster: dict[str, Any]) -> dict[str, Any]:
         _require(entity_refs and all(ref in entities for ref in entity_refs),
                  f"relationship {relation['id']} has unknown or missing entity references")
         evidence_refs = relation.get("evidenceIds")
-        _require(isinstance(evidence_refs, list) and evidence_refs,
-                 f"relationship {relation['id']} requires evidence")
-        _require(all(ref in evidence for ref in evidence_refs),
-                 f"relationship {relation['id']} has unknown evidence")
+        _require(isinstance(evidence_refs, list),
+                 f"relationship {relation['id']} evidenceIds must be an array")
+        _require_source_bound_support(f"relationship {relation['id']}", evidence_refs, evidence)
         _active(relation, date.today())
 
     for cohort in cohorts.values():
@@ -172,6 +226,9 @@ def validate_roster(roster: dict[str, Any]) -> dict[str, Any]:
                  f"cohort {cohort['id']} requires definition and version")
         _require(all(ref in evidence for ref in cohort.get("evidenceIds", [])),
                  f"cohort {cohort['id']} has unknown evidence")
+        _require_source_bound_support(
+            f"cohort {cohort['id']}", cohort.get("evidenceIds", []), evidence
+        )
         if cohort.get("kind") in {"computed", "story_specific"}:
             _require(bool(cohort.get("membershipRule")) and bool(cohort.get("dataSnapshotId")),
                      f"cohort {cohort['id']} requires membershipRule and dataSnapshotId")
@@ -202,6 +259,23 @@ def validate_roster(roster: dict[str, Any]) -> dict[str, Any]:
         _require(all(ref in claim_map for ref in note.get("overridesClaimIds", [])),
                  f"editor context {note['id']} overrides an unknown claim")
         _active(note, date.today())
+
+    for lead in retrieval_leads.values():
+        _require(lead.get("method") in {"vector_similarity", "lexical_search"},
+                 f"retrieval lead {lead['id']} has invalid method")
+        _require(lead.get("status") in {"candidate", "dismissed"},
+                 f"retrieval lead {lead['id']} has invalid status")
+        _require(bool(lead.get("query")), f"retrieval lead {lead['id']} requires query")
+        _parse_datetime(lead.get("createdAt"), f"retrieval lead {lead['id']} createdAt")
+        _require(all(ref in entities for ref in lead.get("entityIds", [])),
+                 f"retrieval lead {lead['id']} has unknown entity")
+        _require(all(ref in cohorts for ref in lead.get("cohortIds", [])),
+                 f"retrieval lead {lead['id']} has unknown cohort")
+        refs = lead.get("candidateEvidenceIds")
+        _require(isinstance(refs, list) and refs and all(ref in evidence for ref in refs),
+                 f"retrieval lead {lead['id']} has unknown or missing candidate evidence")
+        _require(all(_is_lead_only_evidence(evidence[ref]) for ref in refs),
+                 f"retrieval lead {lead['id']} must reference lead-only evidence")
 
     story_ids: set[str] = set()
     for binding in roster["storyBindings"]:

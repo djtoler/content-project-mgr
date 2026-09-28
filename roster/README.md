@@ -47,10 +47,12 @@ Story/Data owns cohort meaning and membership. Matching expands the supplied coh
 Do not flatten a subjective trait into an unqualified entity fact. Store:
 
 - documented facts as `factualClaims`;
-- source-attributed traits or descriptions as `characterizations`, with exact evidence;
+- source-attributed subjective traits or descriptions as `characterizations`, with exact evidence and an explicit lens type;
 - the editor's intended public framing as `editorContext`, with author and scope.
 
 For example, an interview describing somebody as competitive is a source characterization. An editor instruction saying that the story should emphasize discipline over rivalry is controlling editorial context. Both remain visible.
+
+Subjective lenses are not discarded or demoted from retrieval. They travel beside factual claims through `characterizationIds` and resolve under `sourceCharacterizations`. Their label keeps interpretation from being mistaken for objective fact. Supported lens types are self-description, source characterization, critical interpretation and audience perception.
 
 ## Retrieval behavior
 
@@ -63,6 +65,14 @@ Research and media stay in their established stores. Shared IDs provide the join
 
 Vector similarity never creates identity, cohort membership, motive or character truth.
 
+### Retrieval-lead quarantine
+
+Vector similarity and lexical search may save a `retrievalLead` with its query, score and candidate passage. That passage is required to remain `lead_only`. It cannot support a factual claim, observed relationship, cohort membership or character/personality characterization.
+
+Promotion requires opening the underlying source, saving source-bound evidence, and creating a separately validated record from that evidence. The vector score is discovery metadata, never support for motive or personality.
+
+`factualClaims` use a closed set of objective claim types. Interpretive predicates such as trait, personality, motive, temperament, character or framing are rejected there. Source-attributed character descriptions belong in `characterizations`; the editor's intended take belongs in `editorContext`.
+
 ## Files
 
 - `entity-context.schema.json` — closed interchange schema.
@@ -70,6 +80,7 @@ Vector similarity never creates identity, cohort membership, motive or character
 - `validate_roster.py` — command-line validation and optional resolved-context inspection.
 - `examples/example-roster.json` — synthetic example; it makes no claims about real people.
 - `tests/test_roster.py` — contract and precedence tests.
+- `VERIFICATION.md` — focused evidence for subjective-lens separation and vector-lead quarantine.
 - `PLAN.md` — ordered implementation and acceptance checks.
 
 ## Commands

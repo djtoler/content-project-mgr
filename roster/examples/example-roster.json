@@ -17,6 +17,13 @@
       "title": "Synthetic ranking fixture",
       "uri": null,
       "retrievedAt": null
+    },
+    {
+      "id": "source:synthetic-vector-index",
+      "kind": "vector_index",
+      "title": "Synthetic vector-search fixture",
+      "uri": null,
+      "retrievedAt": null
     }
   ],
   "evidence": [
@@ -25,6 +32,8 @@
       "sourceId": "source:synthetic-interview",
       "locator": "paragraph 2",
       "quote": "Synthetic evidence says Alex described the process as competitive.",
+      "discoveryMethod": "source_bound",
+      "supportLevel": "direct",
       "observedAt": null
     },
     {
@@ -32,7 +41,31 @@
       "sourceId": "source:synthetic-dataset",
       "locator": "rows 1-2",
       "quote": "Synthetic snapshot contains Alex River and Blair Stone.",
+      "discoveryMethod": "structured_lookup",
+      "supportLevel": "direct",
       "observedAt": null
+    },
+    {
+      "id": "evidence:vector-neighbor-1",
+      "sourceId": "source:synthetic-vector-index",
+      "locator": "nearest-neighbor result 1",
+      "quote": "Synthetic vector neighbor mentions ambition near Alex's name.",
+      "discoveryMethod": "vector_similarity",
+      "supportLevel": "lead_only",
+      "observedAt": null
+    }
+  ],
+  "retrievalLeads": [
+    {
+      "id": "retrieval-lead:alex-ambition",
+      "method": "vector_similarity",
+      "query": "Alex River ambition",
+      "entityIds": ["person:alex-river"],
+      "cohortIds": [],
+      "candidateEvidenceIds": ["evidence:vector-neighbor-1"],
+      "score": 0.81,
+      "status": "candidate",
+      "createdAt": "2026-09-28T12:05:00Z"
     }
   ],
   "entities": [
@@ -46,8 +79,9 @@
       "factualClaims": [
         {
           "id": "claim:alex-career-framing",
-          "predicate": "career_framing",
-          "value": "competition",
+          "claimType": "role",
+          "predicate": "documented_role",
+          "value": "competitor",
           "status": "reviewed",
           "evidenceIds": ["evidence:alex-interview-1"],
           "validFrom": null,
@@ -57,6 +91,7 @@
       "characterizations": [
         {
           "id": "characterization:alex-competitive",
+          "lensType": "self_description",
           "trait": "competitive",
           "statement": "Alex described the process using competitive language.",
           "attributedTo": "Alex River",

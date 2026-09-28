@@ -41,6 +41,19 @@ class RosterTests(unittest.TestCase):
     def test_underlying_characterization_is_preserved(self):
         result = resolve_context(fixture(), "person:alex-river", story_id="story:demo")
         self.assertEqual(result["sourceCharacterizations"][0]["trait"], "competitive")
+        self.assertEqual(result["sourceCharacterizations"][0]["lensType"], "self_description")
+        self.assertEqual(result["overriddenFacts"][0]["claimType"], "role")
+
+    def test_story_binding_carries_fact_and_subjective_lens_separately(self):
+        binding = fixture()["storyBindings"][0]
+        self.assertEqual(binding["claimIds"], ["claim:alex-career-framing"])
+        self.assertEqual(binding["characterizationIds"], ["characterization:alex-competitive"])
+
+    def test_subjective_lens_requires_explicit_label(self):
+        data = fixture()
+        del data["entities"][0]["characterizations"][0]["lensType"]
+        with self.assertRaisesRegex(RosterError, "lensType"):
+            validate_roster(data)
 
     def test_story_editor_context_controls_group_framing(self):
         result = resolve_cohort_context(
@@ -81,8 +94,53 @@ class RosterTests(unittest.TestCase):
     def test_factual_claim_requires_evidence(self):
         data = fixture()
         data["entities"][0]["factualClaims"][0]["evidenceIds"] = []
-        with self.assertRaisesRegex(RosterError, "requires evidence"):
+        with self.assertRaisesRegex(RosterError, "requires source-bound evidence"):
             validate_roster(data)
+
+    def test_subjective_trait_cannot_be_a_factual_claim(self):
+        data = fixture()
+        claim = data["entities"][0]["factualClaims"][0]
+        claim["claimType"] = "personality"
+        claim["predicate"] = "character_trait"
+        claim["value"] = "competitive"
+        with self.assertRaisesRegex(RosterError, "invalid factual claimType"):
+            validate_roster(data)
+
+    def test_interpretive_predicate_cannot_hide_under_factual_type(self):
+        data = fixture()
+        claim = data["entities"][0]["factualClaims"][0]
+        claim["claimType"] = "status"
+        claim["predicate"] = "personality_trait"
+        claim["value"] = "competitive"
+        with self.assertRaisesRegex(RosterError, "interpretive"):
+            validate_roster(data)
+
+    def test_vector_similarity_cannot_support_characterization(self):
+        data = fixture()
+        data["entities"][0]["characterizations"][0]["evidenceIds"] = ["evidence:vector-neighbor-1"]
+        with self.assertRaisesRegex(RosterError, "retrieval-lead evidence"):
+            validate_roster(data)
+
+    def test_vector_similarity_cannot_support_fact(self):
+        data = fixture()
+        data["entities"][0]["factualClaims"][0]["evidenceIds"] = ["evidence:vector-neighbor-1"]
+        with self.assertRaisesRegex(RosterError, "retrieval-lead evidence"):
+            validate_roster(data)
+
+    def test_vector_similarity_cannot_support_observed_relationship(self):
+        data = fixture()
+        data["relationships"][0]["evidenceIds"] = ["evidence:vector-neighbor-1"]
+        with self.assertRaisesRegex(RosterError, "retrieval-lead evidence"):
+            validate_roster(data)
+
+    def test_vector_lead_is_quarantined_from_resolved_context(self):
+        data = fixture()
+        validate_roster(data)
+        result = resolve_context(data, "person:alex-river", story_id="story:demo")
+        serialized = json.dumps(result)
+        self.assertNotIn("retrieval-lead:alex-ambition", serialized)
+        self.assertNotIn("evidence:vector-neighbor-1", serialized)
+        self.assertEqual(data["retrievalLeads"][0]["status"], "candidate")
 
     def test_editor_override_must_reference_known_claim(self):
         data = fixture()

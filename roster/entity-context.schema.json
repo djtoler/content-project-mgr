@@ -11,6 +11,7 @@
     "generatedAt",
     "sources",
     "evidence",
+    "retrievalLeads",
     "entities",
     "relationships",
     "cohorts",
@@ -29,6 +30,10 @@
     "evidence": {
       "type": "array",
       "items": {"$ref": "#/$defs/evidence"}
+    },
+    "retrievalLeads": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/retrievalLead"}
     },
     "entities": {
       "type": "array",
@@ -65,7 +70,7 @@
       "required": ["id", "kind", "title"],
       "properties": {
         "id": {"$ref": "#/$defs/id"},
-        "kind": {"enum": ["document", "dataset", "interview", "editor", "media", "other"]},
+        "kind": {"enum": ["document", "dataset", "interview", "editor", "media", "vector_index", "other"]},
         "title": {"type": "string", "minLength": 1},
         "uri": {"type": ["string", "null"]},
         "retrievedAt": {"type": ["string", "null"], "format": "date-time"}
@@ -74,13 +79,34 @@
     "evidence": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "sourceId", "locator", "quote"],
+      "required": ["id", "sourceId", "locator", "quote", "discoveryMethod", "supportLevel"],
       "properties": {
         "id": {"$ref": "#/$defs/id"},
         "sourceId": {"$ref": "#/$defs/id"},
         "locator": {"type": "string", "minLength": 1},
         "quote": {"type": "string", "minLength": 1},
+        "discoveryMethod": {"enum": ["source_bound", "structured_lookup", "vector_similarity", "lexical_search"]},
+        "supportLevel": {"enum": ["direct", "contextual", "lead_only"]},
         "observedAt": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "retrievalLead": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "method", "query", "entityIds", "cohortIds", "candidateEvidenceIds",
+        "score", "status", "createdAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "method": {"enum": ["vector_similarity", "lexical_search"]},
+        "query": {"type": "string", "minLength": 1},
+        "entityIds": {"$ref": "#/$defs/idArray"},
+        "cohortIds": {"$ref": "#/$defs/idArray"},
+        "candidateEvidenceIds": {"$ref": "#/$defs/idArray"},
+        "score": {"type": ["number", "null"]},
+        "status": {"enum": ["candidate", "dismissed"]},
+        "createdAt": {"type": "string", "format": "date-time"}
       }
     },
     "alias": {
@@ -96,9 +122,10 @@
     "claim": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "predicate", "value", "status", "evidenceIds"],
+      "required": ["id", "claimType", "predicate", "value", "status", "evidenceIds"],
       "properties": {
         "id": {"$ref": "#/$defs/id"},
+        "claimType": {"enum": ["identity", "role", "affiliation", "biographical_event", "work", "metric", "status", "membership"]},
         "predicate": {"type": "string", "minLength": 1},
         "value": {},
         "status": {"enum": ["reviewed", "machine_candidate", "contested"]},
@@ -110,9 +137,10 @@
     "characterization": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "trait", "statement", "attributedTo", "status", "evidenceIds"],
+      "required": ["id", "lensType", "trait", "statement", "attributedTo", "status", "evidenceIds"],
       "properties": {
         "id": {"$ref": "#/$defs/id"},
+        "lensType": {"enum": ["self_description", "source_characterization", "critical_interpretation", "audience_perception"]},
         "trait": {"type": "string", "minLength": 1},
         "statement": {"type": "string", "minLength": 1},
         "attributedTo": {"type": "string", "minLength": 1},
@@ -248,4 +276,3 @@
     }
   }
 }
-

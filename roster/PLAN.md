@@ -74,3 +74,22 @@ Acceptance:
 | 5. Test and publish | 13 unit tests, Python compilation, JSON parsing, CLI validation and `git diff --check`; branch `codex/entity-context-roster` | Passed; committed and pushed |
 
 No real-person roster was generated, no existing entity source was modified, and no model call or external data transfer occurred. Real population remains a later import from the existing Astra roster, resolved Data-layer entities, or a higher-authority curated editor roster.
+
+## Follow-up verification: trait separation and vector-lead quarantine
+
+User-required follow-up, 2026-09-28:
+
+1. Subjective personality, character and motive descriptions must not enter `factualClaims` as permanent entity facts. They belong in evidence-linked `characterizations` or manual `editorContext`.
+2. Vector similarity is discovery evidence only. A vector hit must not become a factual claim, relationship, motive or personality characterization until independent source-bound evidence supports that record.
+
+Acceptance checks:
+
+- The schema and semantic validator reject interpretive `claimType` values in `factualClaims`.
+- Subjective traits remain available as explicitly labeled, attributed `characterizations`; facts, subjective lenses and editor context all travel separately.
+- A characterization supported only by vector-similarity/lead-only evidence is rejected.
+- A reviewed fact or observed relationship supported only by vector-similarity/lead-only evidence is rejected.
+- Vector results can be retained in a separate `retrievalLeads` collection without appearing in resolved facts or characterizations.
+- A source-bound characterization with attribution and direct/contextual support continues to pass.
+- New regression tests run with the original editor-precedence, cohort and reference-integrity tests.
+
+Follow-up result: passed. The complete suite now contains 21 passing tests. Focused evidence and the verification boundary are recorded in `VERIFICATION.md`.
