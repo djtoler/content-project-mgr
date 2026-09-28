@@ -18,6 +18,7 @@ ROOT_LISTS = (
     "sources",
     "evidence",
     "retrievalLeads",
+    "interpretiveBranches",
     "entities",
     "relationships",
     "cohorts",
@@ -111,7 +112,7 @@ def validate_roster(roster: dict[str, Any]) -> dict[str, Any]:
     """Validate references and semantics that JSON Schema cannot enforce alone."""
 
     _require(isinstance(roster, dict), "roster must be an object")
-    _require(roster.get("schemaVersion") == "1.0.0", "unsupported schemaVersion")
+    _require(roster.get("schemaVersion") == "1.1.0", "unsupported schemaVersion")
     for field in ("registryId", "registryVersion", "generatedAt"):
         _require(isinstance(roster.get(field), str) and roster[field], f"missing {field}")
     _parse_datetime(roster["generatedAt"], "generatedAt")
@@ -121,6 +122,7 @@ def validate_roster(roster: dict[str, Any]) -> dict[str, Any]:
     sources = _id_map(roster["sources"], "source")
     evidence = _id_map(roster["evidence"], "evidence")
     retrieval_leads = _id_map(roster["retrievalLeads"], "retrievalLead")
+    interpretive_branches = _id_map(roster["interpretiveBranches"], "interpretiveBranch")
     entities = _id_map(roster["entities"], "entity")
     relationships = _id_map(roster["relationships"], "relationship")
     cohorts = _id_map(roster["cohorts"], "cohort")
@@ -128,7 +130,8 @@ def validate_roster(roster: dict[str, Any]) -> dict[str, Any]:
 
     all_ids: dict[str, str] = {}
     for kind, mapping in (
-        ("source", sources), ("evidence", evidence), ("retrievalLead", retrieval_leads), ("entity", entities),
+        ("source", sources), ("evidence", evidence), ("retrievalLead", retrieval_leads),
+        ("interpretiveBranch", interpretive_branches), ("entity", entities),
         ("relationship", relationships), ("cohort", cohorts), ("editorContext", editor),
     ):
         for item_id in mapping:
@@ -277,6 +280,60 @@ def validate_roster(roster: dict[str, Any]) -> dict[str, Any]:
         _require(all(_is_lead_only_evidence(evidence[ref]) for ref in refs),
                  f"retrieval lead {lead['id']} must reference lead-only evidence")
 
+    for branch in interpretive_branches.values():
+        branch_id = branch["id"]
+        _require(branch.get("branchType") in {
+            "motive", "personality", "dynamic", "causal_hypothesis", "theme",
+            "counter_reading", "other",
+        }, f"interpretive branch {branch_id} has invalid branchType")
+        _require(branch.get("originType") in {
+            "vector_inference", "lexical_inference", "editor_hypothesis",
+            "source_interpretation", "mixed",
+        }, f"interpretive branch {branch_id} has invalid originType")
+        _require(branch.get("cautiousForm") in {
+            "question", "qualified_interpretation",
+        }, f"interpretive branch {branch_id} has invalid cautiousForm")
+        _require(branch.get("preferredNarrativeMode") in {
+            "both", "direct", "cautious",
+        }, f"interpretive branch {branch_id} has invalid preferredNarrativeMode")
+        _require(branch.get("status") in {
+            "open", "researching", "editor_adopted", "source_supported", "rejected",
+        }, f"interpretive branch {branch_id} has invalid status")
+        _require(bool(branch.get("directStatement")) and bool(branch.get("cautiousStatement"))
+                 and bool(branch.get("rationale")),
+                 f"interpretive branch {branch_id} requires directStatement, cautiousStatement and rationale")
+        _require(bool(branch.get("createdBy")),
+                 f"interpretive branch {branch_id} requires createdBy")
+        _parse_datetime(branch.get("createdAt"), f"interpretive branch {branch_id} createdAt")
+        entity_refs = branch.get("entityIds")
+        cohort_refs = branch.get("cohortIds")
+        lead_refs = branch.get("retrievalLeadIds")
+        evidence_refs = branch.get("evidenceIds")
+        _require(isinstance(entity_refs, list) and all(ref in entities for ref in entity_refs),
+                 f"interpretive branch {branch_id} has unknown entity")
+        _require(isinstance(cohort_refs, list) and all(ref in cohorts for ref in cohort_refs),
+                 f"interpretive branch {branch_id} has unknown cohort")
+        _require(entity_refs or cohort_refs,
+                 f"interpretive branch {branch_id} requires an entity or cohort")
+        _require(isinstance(lead_refs, list) and all(ref in retrieval_leads for ref in lead_refs),
+                 f"interpretive branch {branch_id} has unknown retrieval lead")
+        _require(isinstance(evidence_refs, list) and all(ref in evidence for ref in evidence_refs),
+                 f"interpretive branch {branch_id} has unknown evidence")
+        if branch["originType"] == "vector_inference":
+            _require(lead_refs and all(retrieval_leads[ref]["method"] == "vector_similarity"
+                                       for ref in lead_refs),
+                     f"interpretive branch {branch_id} requires a vector retrieval lead")
+        if branch["originType"] == "lexical_inference":
+            _require(lead_refs and all(retrieval_leads[ref]["method"] == "lexical_search"
+                                       for ref in lead_refs),
+                     f"interpretive branch {branch_id} requires a lexical retrieval lead")
+        scope = branch.get("scope", {})
+        _require(scope.get("kind") in {"global", "story"},
+                 f"interpretive branch {branch_id} has invalid scope")
+        if scope.get("kind") == "story":
+            _require(bool(scope.get("storyId")),
+                     f"story-scoped interpretive branch {branch_id} requires storyId")
+
     story_ids: set[str] = set()
     for binding in roster["storyBindings"]:
         story_id = binding.get("storyId")
@@ -288,6 +345,7 @@ def validate_roster(roster: dict[str, Any]) -> dict[str, Any]:
             ("entityIds", entities), ("cohortIds", cohorts),
             ("relationshipIds", relationships), ("claimIds", claim_map),
             ("characterizationIds", characterization_map), ("evidenceIds", evidence),
+            ("interpretiveBranchIds", interpretive_branches),
             ("editorContextIds", editor),
         )
         for field, known in checks:
@@ -300,6 +358,10 @@ def validate_roster(roster: dict[str, Any]) -> dict[str, Any]:
             scope = editor[note_id]["scope"]
             _require(scope["kind"] == "global" or scope.get("storyId") == story_id,
                      f"story {story_id} references editor context for another story")
+        for branch_id in binding["interpretiveBranchIds"]:
+            scope = interpretive_branches[branch_id]["scope"]
+            _require(scope["kind"] == "global" or scope.get("storyId") == story_id,
+                     f"story {story_id} references interpretive branch for another story")
 
     return roster
 
@@ -327,6 +389,33 @@ def resolve_context(
     entity = entities[entity_id]
     facts = [item for item in entity["factualClaims"] if _active(item, active_date)]
     characterizations = [item for item in entity["characterizations"] if _active(item, active_date)]
+    branches = []
+    rejected_branches = []
+    for branch in roster["interpretiveBranches"]:
+        if entity_id not in branch["entityIds"]:
+            continue
+        scope = branch["scope"]
+        if scope["kind"] == "story" and scope.get("storyId") != story_id:
+            continue
+        if branch["status"] == "rejected":
+            rejected_branches.append(branch)
+        else:
+            branches.append(branch)
+
+    branch_rank = {
+        "editor_adopted": 4,
+        "source_supported": 3,
+        "researching": 2,
+        "open": 1,
+    }
+    branches.sort(
+        key=lambda item: (
+            branch_rank[item["status"]],
+            _parse_datetime(item["createdAt"], "createdAt"),
+            item["id"],
+        ),
+        reverse=True,
+    )
 
     notes = []
     for note in roster["editorContext"]:
@@ -363,6 +452,7 @@ def resolve_context(
         "authorityOrder": [
             "story_scoped_editor_context",
             "global_editor_context",
+            "editor_adopted_interpretive_branches",
             "reviewed_factual_context",
             "machine_derived_candidates",
         ],
@@ -377,6 +467,8 @@ def resolve_context(
         "machineCandidates": machine_facts,
         "contestedFacts": contested_facts,
         "sourceCharacterizations": characterizations,
+        "interpretiveBranches": branches,
+        "rejectedInterpretiveBranches": rejected_branches,
     }
 
 

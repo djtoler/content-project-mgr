@@ -48,6 +48,48 @@ class RosterTests(unittest.TestCase):
         binding = fixture()["storyBindings"][0]
         self.assertEqual(binding["claimIds"], ["claim:alex-career-framing"])
         self.assertEqual(binding["characterizationIds"], ["characterization:alex-competitive"])
+        self.assertEqual(binding["interpretiveBranchIds"],
+                         ["interpretive-branch:alex-jealousy"])
+
+    def test_vector_similarity_can_create_direct_interpretive_assertion(self):
+        data = fixture()
+        self.assertEqual(validate_roster(data)["schemaVersion"], "1.1.0")
+        branch = data["interpretiveBranches"][0]
+        self.assertEqual(branch["directStatement"], "Alex was jealous of Blair.")
+        self.assertEqual(branch["cautiousStatement"], "Was Alex jealous of Blair?")
+        self.assertEqual(branch["preferredNarrativeMode"], "both")
+        self.assertEqual(branch["originType"], "vector_inference")
+
+    def test_interpretive_branch_requires_direct_and_cautious_language(self):
+        data = fixture()
+        del data["interpretiveBranches"][0]["cautiousStatement"]
+        with self.assertRaisesRegex(RosterError, "directStatement, cautiousStatement"):
+            validate_roster(data)
+
+    def test_interpretive_assertion_resolves_only_in_its_labeled_lane(self):
+        result = resolve_context(fixture(), "person:alex-river", story_id="story:demo")
+        self.assertEqual(result["interpretiveBranches"][0]["id"],
+                         "interpretive-branch:alex-jealousy")
+        self.assertEqual(result["interpretiveBranches"][0]["status"], "editor_adopted")
+        self.assertNotIn("Alex was jealous of Blair.", json.dumps(result["supportingFacts"]))
+        self.assertNotIn("Was Alex jealous of Blair?", json.dumps(result["supportingFacts"]))
+        self.assertNotIn("Alex was jealous of Blair.", json.dumps(result["sourceCharacterizations"]))
+
+    def test_story_scoped_interpretive_branch_stays_in_its_story(self):
+        result = resolve_context(fixture(), "person:alex-river", story_id="story:other")
+        self.assertEqual(result["interpretiveBranches"], [])
+
+    def test_vector_interpretive_branch_requires_vector_lead(self):
+        data = fixture()
+        data["interpretiveBranches"][0]["retrievalLeadIds"] = []
+        with self.assertRaisesRegex(RosterError, "requires a vector retrieval lead"):
+            validate_roster(data)
+
+    def test_interpretive_branch_cannot_be_bound_to_another_story(self):
+        data = fixture()
+        data["interpretiveBranches"][0]["scope"]["storyId"] = "story:other"
+        with self.assertRaisesRegex(RosterError, "interpretive branch for another story"):
+            validate_roster(data)
 
     def test_subjective_lens_requires_explicit_label(self):
         data = fixture()
@@ -133,13 +175,14 @@ class RosterTests(unittest.TestCase):
         with self.assertRaisesRegex(RosterError, "retrieval-lead evidence"):
             validate_roster(data)
 
-    def test_vector_lead_is_quarantined_from_resolved_context(self):
+    def test_vector_lead_enters_only_through_labeled_interpretive_branch(self):
         data = fixture()
         validate_roster(data)
         result = resolve_context(data, "person:alex-river", story_id="story:demo")
         serialized = json.dumps(result)
-        self.assertNotIn("retrieval-lead:alex-ambition", serialized)
-        self.assertNotIn("evidence:vector-neighbor-1", serialized)
+        self.assertIn("retrieval-lead:alex-ambition", serialized)
+        self.assertIn("evidence:vector-neighbor-1", serialized)
+        self.assertNotIn("Alex was jealous of Blair.", json.dumps(result["supportingFacts"]))
         self.assertEqual(data["retrievalLeads"][0]["status"], "candidate")
 
     def test_editor_override_must_reference_known_claim(self):

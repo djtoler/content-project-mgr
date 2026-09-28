@@ -12,6 +12,7 @@
     "sources",
     "evidence",
     "retrievalLeads",
+    "interpretiveBranches",
     "entities",
     "relationships",
     "cohorts",
@@ -19,7 +20,7 @@
     "storyBindings"
   ],
   "properties": {
-    "schemaVersion": {"const": "1.0.0"},
+    "schemaVersion": {"const": "1.1.0"},
     "registryId": {"type": "string", "minLength": 1},
     "registryVersion": {"type": "string", "minLength": 1},
     "generatedAt": {"type": "string", "format": "date-time"},
@@ -34,6 +35,10 @@
     "retrievalLeads": {
       "type": "array",
       "items": {"$ref": "#/$defs/retrievalLead"}
+    },
+    "interpretiveBranches": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/interpretiveBranch"}
     },
     "entities": {
       "type": "array",
@@ -106,6 +111,34 @@
         "candidateEvidenceIds": {"$ref": "#/$defs/idArray"},
         "score": {"type": ["number", "null"]},
         "status": {"enum": ["candidate", "dismissed"]},
+        "createdAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "interpretiveBranch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "branchType", "originType", "directStatement", "cautiousStatement",
+        "cautiousForm", "preferredNarrativeMode", "rationale",
+        "status", "scope", "entityIds", "cohortIds", "retrievalLeadIds", "evidenceIds",
+        "createdBy", "createdAt"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "branchType": {"enum": ["motive", "personality", "dynamic", "causal_hypothesis", "theme", "counter_reading", "other"]},
+        "originType": {"enum": ["vector_inference", "lexical_inference", "editor_hypothesis", "source_interpretation", "mixed"]},
+        "directStatement": {"type": "string", "minLength": 1},
+        "cautiousStatement": {"type": "string", "minLength": 1},
+        "cautiousForm": {"enum": ["question", "qualified_interpretation"]},
+        "preferredNarrativeMode": {"enum": ["both", "direct", "cautious"]},
+        "rationale": {"type": "string", "minLength": 1},
+        "status": {"enum": ["open", "researching", "editor_adopted", "source_supported", "rejected"]},
+        "scope": {"$ref": "#/$defs/scope"},
+        "entityIds": {"$ref": "#/$defs/idArray"},
+        "cohortIds": {"$ref": "#/$defs/idArray"},
+        "retrievalLeadIds": {"$ref": "#/$defs/idArray"},
+        "evidenceIds": {"$ref": "#/$defs/idArray"},
+        "createdBy": {"type": "string", "minLength": 1},
         "createdAt": {"type": "string", "format": "date-time"}
       }
     },
@@ -261,7 +294,7 @@
       "additionalProperties": false,
       "required": [
         "storyId", "entityIds", "cohortIds", "relationshipIds", "claimIds",
-        "characterizationIds", "evidenceIds", "editorContextIds"
+        "characterizationIds", "interpretiveBranchIds", "evidenceIds", "editorContextIds"
       ],
       "properties": {
         "storyId": {"$ref": "#/$defs/id"},
@@ -270,6 +303,7 @@
         "relationshipIds": {"$ref": "#/$defs/idArray"},
         "claimIds": {"$ref": "#/$defs/idArray"},
         "characterizationIds": {"$ref": "#/$defs/idArray"},
+        "interpretiveBranchIds": {"$ref": "#/$defs/idArray"},
         "evidenceIds": {"$ref": "#/$defs/idArray"},
         "editorContextIds": {"$ref": "#/$defs/idArray"}
       }

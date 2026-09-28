@@ -93,3 +93,21 @@ Acceptance checks:
 - New regression tests run with the original editor-precedence, cohort and reference-integrity tests.
 
 Follow-up result: passed. The complete suite now contains 21 passing tests. Focused evidence and the verification boundary are recorded in `VERIFICATION.md`.
+
+## Interpretive-branch amendment
+
+User-approved clarification, 2026-09-28:
+
+1. A vector or lexical retrieval lead may originate a separately labeled `interpretiveBranch` without first becoming source-bound evidence.
+2. The branch may contain direct declarative language such as “Person X was jealous.” This does not turn it into a factual claim.
+3. Carry both the direct assertion and a cautious question or qualified version; the editor may prefer `both`, `direct` or `cautious` presentation.
+4. Story bindings and entity resolution must return interpretive branches separately from facts and source-attributed characterizations.
+
+Acceptance checks:
+
+- A vector-backed direct assertion validates as an interpretive branch.
+- Both direct and cautious formulations are required.
+- The branch appears only in `interpretiveBranches`, never `supportingFacts` or `sourceCharacterizations`.
+- Story-scoped branches cannot leak into another story.
+- A vector-origin branch must reference a vector retrieval lead.
+- Existing restrictions on factual claims, observed relationships, cohorts and source-attributed characterizations remain enforced.

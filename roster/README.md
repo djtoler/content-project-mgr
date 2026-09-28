@@ -14,8 +14,9 @@ The deterministic resolver uses this order:
 
 1. story-scoped manual editor context;
 2. global manual editor context;
-3. reviewed factual claims and source characterizations;
-4. machine-derived candidates.
+3. editor-adopted interpretive branches;
+4. reviewed factual claims and source characterizations;
+5. machine-derived candidates.
 
 Manual editor context controls the public-facing editorial interpretation. A conflicting factual or model-derived record remains preserved in `supportingFacts` or `overriddenFacts` so it can be inspected, but it cannot overwrite or outrank an applicable editor instruction.
 
@@ -33,7 +34,7 @@ Research chunks should retain `mentionedEntityIds` and the narrower `aboutEntity
 
 ### Story-package assembly
 
-The story-package builder selects relevant IDs from the resolved evidence graph and saves a `storyBinding` containing entity, cohort, relationship, claim, characterization and evidence references. The writing agent receives this binding with the evidence packet.
+The story-package builder selects relevant IDs from the resolved evidence graph and saves a `storyBinding` containing entity, cohort, relationship, claim, characterization, interpretive-branch and evidence references. The writing agent receives this binding with the evidence packet.
 
 ### Cohorts
 
@@ -54,6 +55,17 @@ For example, an interview describing somebody as competitive is a source charact
 
 Subjective lenses are not discarded or demoted from retrieval. They travel beside factual claims through `characterizationIds` and resolve under `sourceCharacterizations`. Their label keeps interpretation from being mistaken for objective fact. Supported lens types are self-description, source characterization, critical interpretation and audience perception.
 
+## Interpretive branches
+
+An `interpretiveBranch` is a first-class narrative hypothesis, lens or possible reading. Vector or lexical similarity may create one directly even when the lead cannot support a fact or source-attributed characterization. The branch may say `Alex was jealous of Blair.`; direct wording is allowed because the record's type, not its grammar, controls downstream handling.
+
+Every branch carries both:
+
+- `directStatement`, for forceful narrative development;
+- `cautiousStatement`, expressed as a question or qualified interpretation.
+
+`preferredNarrativeMode` records whether the editor wants both, direct or cautious presentation. Status distinguishes open research from an editor-adopted, source-supported or rejected interpretation. An editor-adopted branch receives high narrative priority but remains an interpretation and is never returned under `supportingFacts`.
+
 ## Retrieval behavior
 
 Research and media stay in their established stores. Shared IDs provide the join:
@@ -63,13 +75,13 @@ Research and media stay in their established stores. Shared IDs provide the join
 3. use semantic or lexical retrieval inside the eligible set;
 4. return evidence or media with the IDs and provenance that caused the match.
 
-Vector similarity never creates identity, cohort membership, motive or character truth.
+Vector similarity never creates identity, cohort membership or factual truth. It may create a clearly labeled interpretive branch about motive or character.
 
 ### Retrieval-lead quarantine
 
-Vector similarity and lexical search may save a `retrievalLead` with its query, score and candidate passage. That passage is required to remain `lead_only`. It cannot support a factual claim, observed relationship, cohort membership or character/personality characterization.
+Vector similarity and lexical search may save a `retrievalLead` with its query, score and candidate passage. That passage is required to remain `lead_only`. It cannot support a factual claim, observed relationship, cohort membership or source-attributed characterization. It may originate an `interpretiveBranch`, which retains the lead reference and remains labeled as interpretation.
 
-Promotion requires opening the underlying source, saving source-bound evidence, and creating a separately validated record from that evidence. The vector score is discovery metadata, never support for motive or personality.
+Promotion into a fact or source-attributed characterization requires opening the underlying source, saving source-bound evidence, and creating a separately validated record. No such promotion is needed to preserve or narratively explore the idea as an interpretive branch.
 
 `factualClaims` use a closed set of objective claim types. Interpretive predicates such as trait, personality, motive, temperament, character or framing are rejected there. Source-attributed character descriptions belong in `characterizations`; the editor's intended take belongs in `editorContext`.
 

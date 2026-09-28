@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "registryId": "registry:synthetic-example",
   "registryVersion": "2026-09-28.1",
   "generatedAt": "2026-09-28T12:00:00Z",
@@ -66,6 +66,26 @@
       "score": 0.81,
       "status": "candidate",
       "createdAt": "2026-09-28T12:05:00Z"
+    }
+  ],
+  "interpretiveBranches": [
+    {
+      "id": "interpretive-branch:alex-jealousy",
+      "branchType": "motive",
+      "originType": "vector_inference",
+      "directStatement": "Alex was jealous of Blair.",
+      "cautiousStatement": "Was Alex jealous of Blair?",
+      "cautiousForm": "question",
+      "preferredNarrativeMode": "both",
+      "rationale": "The synthetic vector lead creates a potentially useful narrative interpretation to investigate; it does not establish a fact.",
+      "status": "editor_adopted",
+      "scope": {"kind": "story", "storyId": "story:demo"},
+      "entityIds": ["person:alex-river", "person:blair-stone"],
+      "cohortIds": [],
+      "retrievalLeadIds": ["retrieval-lead:alex-ambition"],
+      "evidenceIds": ["evidence:vector-neighbor-1"],
+      "createdBy": "editor:owner",
+      "createdAt": "2026-09-28T12:07:00Z"
     }
   ],
   "entities": [
@@ -208,6 +228,7 @@
       "relationshipIds": ["relationship:alex-blair-collaboration"],
       "claimIds": ["claim:alex-career-framing"],
       "characterizationIds": ["characterization:alex-competitive"],
+      "interpretiveBranchIds": ["interpretive-branch:alex-jealousy"],
       "evidenceIds": ["evidence:alex-interview-1", "evidence:ranking-snapshot"],
       "editorContextIds": [
         "editor-context:alex-global",

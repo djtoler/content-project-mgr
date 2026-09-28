@@ -46,6 +46,7 @@ def main() -> int:
                 "registryVersion": value["registryVersion"],
                 "entities": len(value["entities"]),
                 "cohorts": len(value["cohorts"]),
+                "interpretiveBranches": len(value["interpretiveBranches"]),
                 "editorContext": len(value["editorContext"]),
                 "storyBindings": len(value["storyBindings"]),
             }))
