@@ -71,6 +71,6 @@ Acceptance:
 | 2. Closed schema | `entity-context.schema.json`; JSON parsing and closed-root test | Passed |
 | 3. Validation and resolution | `roster.py`, `validate_roster.py`; person and cohort precedence tests | Passed |
 | 4. Handoff guidance | `README.md`; synthetic story binding and computed cohort fixture | Passed |
-| 5. Test and publish | 13 unit tests, Python compilation, JSON parsing, CLI validation and `git diff --check` | Tests passed; commit and push pending |
+| 5. Test and publish | 13 unit tests, Python compilation, JSON parsing, CLI validation and `git diff --check`; branch `codex/entity-context-roster` | Passed; committed and pushed |
 
 No real-person roster was generated, no existing entity source was modified, and no model call or external data transfer occurred. Real population remains a later import from the existing Astra roster, resolved Data-layer entities, or a higher-authority curated editor roster.
