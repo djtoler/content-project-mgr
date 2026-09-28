@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/djtoler/content-project-mgr/roster/entity-context.schema.json",
+  "title": "Shared entity-context roster",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "registryId",
+    "registryVersion",
+    "generatedAt",
+    "sources",
+    "evidence",
+    "entities",
+    "relationships",
+    "cohorts",
+    "editorContext",
+    "storyBindings"
+  ],
+  "properties": {
+    "schemaVersion": {"const": "1.0.0"},
+    "registryId": {"type": "string", "minLength": 1},
+    "registryVersion": {"type": "string", "minLength": 1},
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "sources": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/source"}
+    },
+    "evidence": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/evidence"}
+    },
+    "entities": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/entity"}
+    },
+    "relationships": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/relationship"}
+    },
+    "cohorts": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/cohort"}
+    },
+    "editorContext": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/editorContext"}
+    },
+    "storyBindings": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/storyBinding"}
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]*$"},
+    "idArray": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/id"},
+      "uniqueItems": true
+    },
+    "date": {"type": "string", "format": "date"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "title"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "kind": {"enum": ["document", "dataset", "interview", "editor", "media", "other"]},
+        "title": {"type": "string", "minLength": 1},
+        "uri": {"type": ["string", "null"]},
+        "retrievedAt": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "sourceId", "locator", "quote"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "sourceId": {"$ref": "#/$defs/id"},
+        "locator": {"type": "string", "minLength": 1},
+        "quote": {"type": "string", "minLength": 1},
+        "observedAt": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "alias": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "kind", "reviewState"],
+      "properties": {
+        "value": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["legal_name", "stage_name", "nickname", "handle", "alternate_spelling"]},
+        "reviewState": {"enum": ["reviewed", "candidate"]}
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "predicate", "value", "status", "evidenceIds"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "predicate": {"type": "string", "minLength": 1},
+        "value": {},
+        "status": {"enum": ["reviewed", "machine_candidate", "contested"]},
+        "evidenceIds": {"$ref": "#/$defs/idArray"},
+        "validFrom": {"oneOf": [{"$ref": "#/$defs/date"}, {"type": "null"}]},
+        "validTo": {"oneOf": [{"$ref": "#/$defs/date"}, {"type": "null"}]}
+      }
+    },
+    "characterization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "trait", "statement", "attributedTo", "status", "evidenceIds"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "trait": {"type": "string", "minLength": 1},
+        "statement": {"type": "string", "minLength": 1},
+        "attributedTo": {"type": "string", "minLength": 1},
+        "status": {"enum": ["reviewed", "machine_candidate", "contested"]},
+        "evidenceIds": {"$ref": "#/$defs/idArray"},
+        "validFrom": {"oneOf": [{"$ref": "#/$defs/date"}, {"type": "null"}]},
+        "validTo": {"oneOf": [{"$ref": "#/$defs/date"}, {"type": "null"}]}
+      }
+    },
+    "entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "canonicalName", "aliases", "factualClaims", "characterizations"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "type": {"enum": ["person", "organization", "work", "place", "event", "other"]},
+        "canonicalName": {"type": "string", "minLength": 1},
+        "aliases": {"type": "array", "items": {"$ref": "#/$defs/alias"}},
+        "factualClaims": {"type": "array", "items": {"$ref": "#/$defs/claim"}},
+        "characterizations": {"type": "array", "items": {"$ref": "#/$defs/characterization"}}
+      }
+    },
+    "relationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "sourceEntityIds", "targetEntityIds", "status", "evidenceIds"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "type": {"type": "string", "minLength": 1},
+        "sourceEntityIds": {"$ref": "#/$defs/idArray"},
+        "targetEntityIds": {"$ref": "#/$defs/idArray"},
+        "status": {"enum": ["reviewed_observed", "machine_candidate", "hypothesis", "contested"]},
+        "evidenceIds": {"$ref": "#/$defs/idArray"},
+        "validFrom": {"oneOf": [{"$ref": "#/$defs/date"}, {"type": "null"}]},
+        "validTo": {"oneOf": [{"$ref": "#/$defs/date"}, {"type": "null"}]}
+      }
+    },
+    "cohort": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "kind", "definition", "version", "memberEntityIds", "evidenceIds"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "label": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["persistent", "computed", "story_specific"]},
+        "definition": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "memberEntityIds": {"$ref": "#/$defs/idArray"},
+        "evidenceIds": {"$ref": "#/$defs/idArray"},
+        "membershipRule": {"type": ["string", "null"]},
+        "dataSnapshotId": {"type": ["string", "null"]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"enum": ["computed", "story_specific"]}}},
+          "then": {
+            "required": ["membershipRule", "dataSnapshotId"],
+            "properties": {
+              "membershipRule": {"type": "string", "minLength": 1},
+              "dataSnapshotId": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": {"enum": ["global", "story"]},
+        "storyId": {"type": ["string", "null"]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "story"}}},
+          "then": {
+            "required": ["storyId"],
+            "properties": {"storyId": {"type": "string", "minLength": 1}}
+          }
+        }
+      ]
+    },
+    "directive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "value"],
+      "properties": {
+        "key": {"type": "string", "minLength": 1},
+        "value": {}
+      }
+    },
+    "editorContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "author", "createdAt", "status", "scope", "entityIds", "cohortIds",
+        "instruction", "directives", "retrievalTerms", "overridesClaimIds"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "author": {"type": "string", "minLength": 1},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "status": {"enum": ["active", "superseded"]},
+        "scope": {"$ref": "#/$defs/scope"},
+        "entityIds": {"$ref": "#/$defs/idArray"},
+        "cohortIds": {"$ref": "#/$defs/idArray"},
+        "instruction": {"type": "string", "minLength": 1},
+        "directives": {"type": "array", "items": {"$ref": "#/$defs/directive"}},
+        "retrievalTerms": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "overridesClaimIds": {"$ref": "#/$defs/idArray"},
+        "activeFrom": {"oneOf": [{"$ref": "#/$defs/date"}, {"type": "null"}]},
+        "activeTo": {"oneOf": [{"$ref": "#/$defs/date"}, {"type": "null"}]}
+      }
+    },
+    "storyBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "storyId", "entityIds", "cohortIds", "relationshipIds", "claimIds",
+        "characterizationIds", "evidenceIds", "editorContextIds"
+      ],
+      "properties": {
+        "storyId": {"$ref": "#/$defs/id"},
+        "entityIds": {"$ref": "#/$defs/idArray"},
+        "cohortIds": {"$ref": "#/$defs/idArray"},
+        "relationshipIds": {"$ref": "#/$defs/idArray"},
+        "claimIds": {"$ref": "#/$defs/idArray"},
+        "characterizationIds": {"$ref": "#/$defs/idArray"},
+        "evidenceIds": {"$ref": "#/$defs/idArray"},
+        "editorContextIds": {"$ref": "#/$defs/idArray"}
+      }
+    }
+  }
+}
+

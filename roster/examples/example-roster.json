@@ -1,0 +1,184 @@
+{
+  "schemaVersion": "1.0.0",
+  "registryId": "registry:synthetic-example",
+  "registryVersion": "2026-09-28.1",
+  "generatedAt": "2026-09-28T12:00:00Z",
+  "sources": [
+    {
+      "id": "source:synthetic-interview",
+      "kind": "interview",
+      "title": "Synthetic interview fixture",
+      "uri": null,
+      "retrievedAt": null
+    },
+    {
+      "id": "source:synthetic-dataset",
+      "kind": "dataset",
+      "title": "Synthetic ranking fixture",
+      "uri": null,
+      "retrievedAt": null
+    }
+  ],
+  "evidence": [
+    {
+      "id": "evidence:alex-interview-1",
+      "sourceId": "source:synthetic-interview",
+      "locator": "paragraph 2",
+      "quote": "Synthetic evidence says Alex described the process as competitive.",
+      "observedAt": null
+    },
+    {
+      "id": "evidence:ranking-snapshot",
+      "sourceId": "source:synthetic-dataset",
+      "locator": "rows 1-2",
+      "quote": "Synthetic snapshot contains Alex River and Blair Stone.",
+      "observedAt": null
+    }
+  ],
+  "entities": [
+    {
+      "id": "person:alex-river",
+      "type": "person",
+      "canonicalName": "Alex River",
+      "aliases": [
+        {"value": "A. River", "kind": "alternate_spelling", "reviewState": "reviewed"}
+      ],
+      "factualClaims": [
+        {
+          "id": "claim:alex-career-framing",
+          "predicate": "career_framing",
+          "value": "competition",
+          "status": "reviewed",
+          "evidenceIds": ["evidence:alex-interview-1"],
+          "validFrom": null,
+          "validTo": null
+        }
+      ],
+      "characterizations": [
+        {
+          "id": "characterization:alex-competitive",
+          "trait": "competitive",
+          "statement": "Alex described the process using competitive language.",
+          "attributedTo": "Alex River",
+          "status": "reviewed",
+          "evidenceIds": ["evidence:alex-interview-1"],
+          "validFrom": null,
+          "validTo": null
+        }
+      ]
+    },
+    {
+      "id": "person:blair-stone",
+      "type": "person",
+      "canonicalName": "Blair Stone",
+      "aliases": [],
+      "factualClaims": [],
+      "characterizations": []
+    }
+  ],
+  "relationships": [
+    {
+      "id": "relationship:alex-blair-collaboration",
+      "type": "collaborated_with",
+      "sourceEntityIds": ["person:alex-river"],
+      "targetEntityIds": ["person:blair-stone"],
+      "status": "reviewed_observed",
+      "evidenceIds": ["evidence:ranking-snapshot"],
+      "validFrom": null,
+      "validTo": null
+    }
+  ],
+  "cohorts": [
+    {
+      "id": "cohort:synthetic-pair",
+      "label": "Synthetic pair",
+      "kind": "persistent",
+      "definition": "Two synthetic people used by the contract fixture.",
+      "version": "1",
+      "memberEntityIds": ["person:alex-river", "person:blair-stone"],
+      "evidenceIds": ["evidence:ranking-snapshot"],
+      "membershipRule": null,
+      "dataSnapshotId": null
+    },
+    {
+      "id": "cohort:synthetic-top-two-2026-09-28",
+      "label": "Synthetic top two",
+      "kind": "computed",
+      "definition": "Top two rows in the synthetic ranking snapshot.",
+      "version": "2026-09-28.1",
+      "memberEntityIds": ["person:alex-river", "person:blair-stone"],
+      "evidenceIds": ["evidence:ranking-snapshot"],
+      "membershipRule": "order by synthetic_value descending; take 2",
+      "dataSnapshotId": "snapshot:synthetic-ranking-2026-09-28"
+    }
+  ],
+  "editorContext": [
+    {
+      "id": "editor-context:alex-global",
+      "author": "editor:owner",
+      "createdAt": "2026-09-28T12:10:00Z",
+      "status": "active",
+      "scope": {"kind": "global", "storyId": null},
+      "entityIds": ["person:alex-river"],
+      "cohortIds": [],
+      "instruction": "Prioritize discipline rather than competition when presenting Alex.",
+      "directives": [
+        {"key": "character_framing", "value": "discipline"}
+      ],
+      "retrievalTerms": ["discipline", "preparation", "craft"],
+      "overridesClaimIds": ["claim:alex-career-framing"],
+      "activeFrom": null,
+      "activeTo": null
+    },
+    {
+      "id": "editor-context:alex-demo-story",
+      "author": "editor:owner",
+      "createdAt": "2026-09-28T12:20:00Z",
+      "status": "active",
+      "scope": {"kind": "story", "storyId": "story:demo"},
+      "entityIds": ["person:alex-river"],
+      "cohortIds": [],
+      "instruction": "For this story, emphasize preparation as the reason the result matters.",
+      "directives": [
+        {"key": "character_framing", "value": "preparation"}
+      ],
+      "retrievalTerms": ["preparation", "practice"],
+      "overridesClaimIds": ["claim:alex-career-framing"],
+      "activeFrom": null,
+      "activeTo": null
+    },
+    {
+      "id": "editor-context:synthetic-cohort-demo",
+      "author": "editor:owner",
+      "createdAt": "2026-09-28T12:30:00Z",
+      "status": "active",
+      "scope": {"kind": "story", "storyId": "story:demo"},
+      "entityIds": [],
+      "cohortIds": ["cohort:synthetic-top-two-2026-09-28"],
+      "instruction": "Present the pair as collaborators, not rivals.",
+      "directives": [
+        {"key": "group_framing", "value": "collaboration"}
+      ],
+      "retrievalTerms": ["collaboration", "shared work"],
+      "overridesClaimIds": [],
+      "activeFrom": null,
+      "activeTo": null
+    }
+  ],
+  "storyBindings": [
+    {
+      "storyId": "story:demo",
+      "entityIds": ["person:alex-river", "person:blair-stone"],
+      "cohortIds": ["cohort:synthetic-top-two-2026-09-28"],
+      "relationshipIds": ["relationship:alex-blair-collaboration"],
+      "claimIds": ["claim:alex-career-framing"],
+      "characterizationIds": ["characterization:alex-competitive"],
+      "evidenceIds": ["evidence:alex-interview-1", "evidence:ranking-snapshot"],
+      "editorContextIds": [
+        "editor-context:alex-global",
+        "editor-context:alex-demo-story",
+        "editor-context:synthetic-cohort-demo"
+      ]
+    }
+  ]
+}
