@@ -1,0 +1,205 @@
+CSV corpus top 200 artists
+Count: 200
+Ranking: 50% RIAA-certified units, 35% lifetime Spotify streams, 15% best U.S. album peak
+Source population: 620 canonical artists
+
+1. Drake
+2. Kanye West
+3. Travis Scott
+4. Future
+5. Post Malone
+6. Lil Baby
+7. Lil Wayne
+8. J. Cole
+9. 21 Savage
+10. Lil Uzi Vert
+11. Gunna
+12. Kodak Black
+13. Kendrick Lamar
+14. Cardi B
+15. Jay-Z
+16. Polo G
+17. The Weeknd
+18. Lil Durk
+19. DaBaby
+20. Nicki Minaj
+21. ASAP Rocky
+22. 50 Cent
+23. XXXTentacion
+24. Mac Miller
+25. Metro Boomin
+26. Big Sean
+27. Trippie Redd
+28. Rod Wave
+29. Roddy Ricch
+30. Young Thug
+31. Wiz Khalifa
+32. Kevin Gates
+33. Megan Thee Stallion
+34. Rae Sremmurd
+35. Kid Cudi
+36. A Boogie Wit da Hoodie
+37. Jack Harlow
+38. Lil Tjay
+39. Logic
+40. 2Pac
+41. Outkast
+42. Migos
+43. Fetty Wap
+44. Ty Dolla $ign
+45. Tory Lanez
+46. NLE Choppa
+47. Macklemore
+48. Playboi Carti
+49. The Notorious B.I.G.
+50. French Montana
+51. ScHoolboy Q
+52. YG
+53. Lil Yachty
+54. 6ix9ine
+55. T.I.
+56. Chance the Rapper
+57. Rick Ross
+58. Nelly
+59. Iggy Azalea
+60. Meek Mill
+61. Wale
+62. Nipsey Hussle
+63. Ski Mask the Slump God
+64. Latto
+65. Lil Mosey
+66. Snoop Dogg
+67. Dr. Dre
+68. Lupe Fiasco
+69. Anderson .Paak
+70. Kid Ink
+71. Chief Keef
+72. The Black Eyed Peas
+73. JID
+74. Trey Songz
+75. Lil Skies
+76. B.o.B
+77. Wu-Tang Clan
+78. Machine Gun Kelly
+79. PnB Rock
+80. NAV
+81. Beastie Boys
+82. Jay Rock
+83. Nas
+84. Iann Dior
+85. Rich Homie Quan
+86. G Herbo
+87. Lil Dicky
+88. K Camp
+89. Denzel Curry
+90. Busta Rhymes
+91. August Alsina
+92. Gucci Mane
+93. Lil Pump
+94. DMX
+95. Yelawolf
+96. Fivio Foreign
+97. Akon
+98. YBN Nahmir
+99. Vince Staples
+100. Kyle
+101. Isaiah Rashad
+102. Lauryn Hill
+103. Flo Rida
+104. Aminé
+105. Ab-Soul
+106. Blueface
+107. GoldLink
+108. YBN Cordae
+109. Missy Elliott
+110. Desiigner
+111. Ghostface Killah
+112. Freddie Gibbs
+113. Mike Jones
+114. Lil' Kim
+115. Da Brat
+116. Joey Bada$$
+117. Raekwon
+118. BlocBoy JB
+119. Eve
+120. A Tribe Called Quest
+121. Curren$y
+122. Remy Ma
+123. Hopsin
+124. Fabolous
+125. N.W.A
+126. The Game
+127. Smokepurpp
+128. Shy Glizzy
+129. DeJ Loaf
+130. Big Pun
+131. Bubba Sparxxx
+132. The Lox
+133. Ace Hood
+134. Comethazine
+135. Petey Pablo
+136. Pusha T
+137. Clipse
+138. Chamillionaire
+139. Freeway
+140. Action Bronson
+141. Ol' Dirty Bastard
+142. Will Smith
+143. Pitbull
+144. N.O.R.E.
+145. St. Lunatics
+146. Big K.R.I.T.
+147. Jeezy
+148. D12
+149. Kris Kross
+150. Mase
+151. Sean Combs
+152. Tha Dogg Pound
+153. The Firm
+154. MadeinTYO
+155. 504 Boyz
+156. Cassidy
+157. Chingy
+158. Def Squad
+159. G-Unit
+160. Mo Thugs
+161. Plies
+162. Sisqo
+163. Slim Thug
+164. Tony Yayo
+165. Warren G
+166. Westside Connection
+167. Murphy Lee
+168. Bizzy Bone
+169. Black Rob
+170. C-Murder
+171. Cappadonna
+172. Ja Rule
+173. Jermaine Dupri
+174. Method Man & Redman
+175. Pharrell
+176. Rich Boy
+177. Young Gunz
+178. Yung Joc
+179. 213
+180. C+C Music Factory
+181. Gnarls Barkley
+182. Krayzie Bone
+183. Method Man
+184. Mims
+185. Rakim
+186. Asher Roth
+187. Beanie Sigel
+188. Drag-On
+189. Jadakiss
+190. MC Eiht
+191. Obie Trice
+192. Shyne
+193. Snow
+194. Timbaland
+195. Bun B
+196. Loon
+197. Lost Boyz
+198. Romeo Miller
+199. Styles P
+200. Birdman
