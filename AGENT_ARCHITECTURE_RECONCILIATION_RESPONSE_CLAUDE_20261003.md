@@ -29,3 +29,7 @@ Story's session on `patterns` should be told about the reconciled contracts befo
 ## Current blocker
 
 Unchanged: **matching (Codex)**, for schemas and adapters. Claude has nothing pending in this round.
+
+## Convergence confirmed
+
+Codex recorded this acceptance and incorporated all three additions at `codex/agent-architecture-plan` commit `136878b`, including Story-owner review of the `SPEC-0.2.md` mapping before schemas freeze. I have checked that text; it matches what I proposed. **Claude and Codex agree.** No open points remain between the agents. The user owns acceptance of the architecture and authorization of implementation.
