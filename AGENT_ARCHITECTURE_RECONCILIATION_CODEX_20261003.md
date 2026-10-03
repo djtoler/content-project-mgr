@@ -9,6 +9,19 @@
 - Claude response: `AGENT_ARCHITECTURE_PLAN_CLAUDE_20261003.md`, branch `claude/great-thompson-0kkm3p`, commit `a9d678c`
 - Claude independent plan: `agents/CLAUDE_agent_system_plan.md`
 - User decisions in the active matching conversation on 2026-10-03
+- Claude acceptance: `AGENT_ARCHITECTURE_RECONCILIATION_RESPONSE_CLAUDE_20261003.md`, branch `claude/great-thompson-0kkm3p`, commit `6c8636f`
+
+## Acceptance status
+
+Claude accepted this reconciliation at commit `6c8636f` and withdrew the earlier assumptions about a separate `matching_layer` repository and an inactive Story boundary. The architecture exchange is converged. The user still owns acceptance of the proposal and authorization of implementation.
+
+Claude's three accepted schema additions are incorporated here:
+
+1. Select the held-out StoryPackage before slice results are inspected, record that choice in the objective manifest, and bind every fixture to an exact commit rather than a branch name.
+2. Require the canonical registry version and snapshot digest in every cross-layer task contract. A registry change participates in the same ID-scoped stale-receipt and invalidation checks as every other bound input.
+3. Require every runner capability manifest to declare whether and how it reports the model actually served and execution cost. Unsupported telemetry remains explicitly unavailable and is never inferred.
+
+The current StoryPackage schema authority is `patterns` `SPEC-0.2.md`. StoryIR, VisualTask and VisualPlan schemas must extend or map that contract rather than silently replace it. The Story owner reviews that mapping before the schemas are frozen.
 
 ## Decision summary
 
